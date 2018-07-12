@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-var Campground = require("../models/campground");
+var Recipe = require("../models/recipe");
 var middleware = require("../middleware");
 
 //=========================================
@@ -28,18 +28,18 @@ cloudinary.config({
 });
 //=========================================
 
-router.get("/campgrounds", function(req, res) {
+router.get("/recipes", function(req, res) {
      //console.log(req);
-   Campground.find({}, function(err, allCampgrounds){
+   Recipe.find({}, function(err, allRecipes){
        if(err) {
            console.log(err);
        } else {
-           res.render("campgrounds/index", {campgrounds: allCampgrounds});
+           res.render("recipes/index", {recipes: allRecipes});
        }
    });
 });
 
-router.post("/campgrounds", middleware.isLoggedIn, upload.single('image'), function(req, res){
+router.post("/recipes", middleware.isLoggedIn, upload.single('image'), function(req, res){
     // //get data from form and add to campgrounds array
     // var name = req.body.name;
     // var price = req.body.price;
@@ -60,73 +60,74 @@ router.post("/campgrounds", middleware.isLoggedIn, upload.single('image'), funct
     //     }
     // });
     
-    
+    console.log(req.file);
     cloudinary.uploader.upload(req.file.path, function(result) {
-        // add cloudinary url for the image to the campground object under image property
-        req.body.campground.image = result.secure_url;
-        // add author to campground
-        req.body.campground.author = {
+        
+        // add cloudinary url for the image to the recipe object under image property
+        req.body.recipe.image = result.secure_url;
+        // add author to recipe
+        req.body.recipe.author = {
             id: req.user._id,
             username: req.user.username
         }
-        Campground.create(req.body.campground, function(err, campground) {
+       Recipe.create(req.body.recipe, function(err, recipe) {
             if (err) {
                 req.flash('error', err.message);
                 return res.redirect('back');
             }
-            res.redirect('/campgrounds/' + campground.id);
+            res.redirect('/recipes/' + recipe.id);
         });
     });
 });
 
-router.get("/campgrounds/new", middleware.isLoggedIn, function(req, res){
-    res.render("campgrounds/new.ejs");
+router.get("/recipes/new", middleware.isLoggedIn, function(req, res){
+    res.render("recipes/new.ejs");
 });
 
-router.get("/campgrounds/:id", function(req, res) {
-    //find campground with id
-    //show campgrounds 
-    Campground.findById(req.params.id).populate("comments").exec(function(err, foundCamp){
+router.get("/recipes/:id", function(req, res) {
+    //find recipe with id
+    //show recipes 
+    Recipe.findById(req.params.id).populate("comments").exec(function(err, foundRec){
         if (err) {
             console.log(err);
         } else {
-            res.render("campgrounds/show", {campground: foundCamp});
+            res.render("recipes/show", {recipe: foundRec});
         }
     });
 });
 
-//Edit campground route
-router.get("/campgrounds/:id/edit", middleware.checkCampgroundOwnership, function(req, res) {
-    Campground.findById(req.params.id, function(err, foundCamp){
+//Edit recipe route
+router.get("/recipes/:id/edit", middleware.checkRecipeOwnership, function(req, res) {
+    Recipe.findById(req.params.id, function(err, foundRec){
         if(err) {
             console.log(err);
         } else {
-            res.render("campgrounds/edit", {campground: foundCamp});
+            res.render("recipes/edit", {recipe: foundRec});
         }
     });
 });
 
-//Update campground route
-router.put("/campgrounds/:id", middleware.checkCampgroundOwnership ,function(req, res){
-    //find and update
-    Campground.findByIdAndUpdate(req.params.id, req.body.campground ,function(err, updatedCamp){
+//Update recipe route
+router.put("/recipes/:id", middleware.checkRecipeOwnership, function(req, res){
+    Recipe.findByIdAndUpdate(req.params.id, req.body.recipe ,function(err, updatedRec){
         if (err) {
             console.log(err);
         } else {
-            req.flash("success", "campground updated!");
-            res.redirect("/campgrounds/" + req.params.id);
+            req.flash("success", "recipe updated!");
+            res.redirect("/recipes/" + req.params.id);
         }
     });
+
 });
 
 //delete
-router.delete("/campgrounds/:id", middleware.checkCampgroundOwnership, function(req, res){
-    Campground.findByIdAndRemove(req.params.id, function(err){
+router.delete("/recipes/:id", middleware.checkRecipeOwnership, function(req, res){
+    Recipe.findByIdAndRemove(req.params.id, function(err){
        if(err) {
            console.log(err);
        } else {
-           req.flash("success", "campground deleted!");
-           res.redirect("/campgrounds");
+           req.flash("success", "recipe deleted!");
+           res.redirect("/recipes");
        }
     });
 });

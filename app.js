@@ -10,11 +10,11 @@ var express = require("express"),
     flash = require("connect-flash");
     
 var commentRoutes = require("./routes/comments"),
-    campgroundRoutes = require("./routes/campgrounds"),
+    recipeRoutes = require("./routes/recipes"),
     indexRoutes = require("./routes/index");
     
-//mongoose.connect("mongodb://localhost/yelp_camp");
-mongoose.connect("mongodb://lei:123abc@ds121341.mlab.com:21341/yelpcamp_lei");
+mongoose.connect("mongodb://localhost/yelp_camp");
+//mongoose.connect("mongodb://lei:123abc@ds121341.mlab.com:21341/yelpcamp_lei");
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
@@ -44,9 +44,9 @@ app.use(function(req, res, next){
 });
 
 app.use(indexRoutes);
-app.use(campgroundRoutes);
+app.use(recipeRoutes);
 app.use(commentRoutes);
 
 app.listen(process.env.PORT, process.env.IP, function(){
-    console.log("YelpCmap Server has started!!!");
+    console.log("Server has started!!!");
 });
